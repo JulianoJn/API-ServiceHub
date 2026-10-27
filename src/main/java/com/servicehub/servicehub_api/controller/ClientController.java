@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,7 @@ public class ClientController {
         this.clientService = clientService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     @PostMapping
     @Operation(
             summary = "Criar cliente",
@@ -48,12 +51,13 @@ public class ClientController {
             )
     })
     public ResponseEntity<Client> criar(
-            @RequestBody Client client) {
+           @Valid @RequestBody Client client) {
 
         return ResponseEntity.status(201)
                 .body(clientService.criar(client));
     }
 
+    @PreAuthorize("isAuthenticated")
     @GetMapping
     @Operation(
             summary = "Listar clientes",
@@ -73,6 +77,7 @@ public class ClientController {
         return ResponseEntity.ok(clientService.listar());
     }
 
+    @PreAuthorize("isAuthenticated")
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar cliente por ID",
@@ -105,6 +110,8 @@ public class ClientController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     @PutMapping("/{id}")
     @Operation(
             summary = "Atualizar cliente",
@@ -127,14 +134,14 @@ public class ClientController {
                     required = true
             )
             @PathVariable Long id,
-
-            @RequestBody Client client) {
+            @Valid @RequestBody Client client) {
 
         return ResponseEntity.ok(
                 clientService.atualizar(id, client)
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLIENT')")
     @PatchMapping("/{id}")
     @Operation(
             summary = "Atualizar parcialmente um cliente",
@@ -161,7 +168,6 @@ public class ClientController {
                     required = true
             )
             @PathVariable Long id,
-
             @RequestBody Map<String, Object> campos) {
 
         return clientService.atualizarParcial(id, campos)
@@ -169,6 +175,7 @@ public class ClientController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Excluir cliente",

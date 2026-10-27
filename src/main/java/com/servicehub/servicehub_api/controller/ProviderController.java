@@ -9,7 +9,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -29,6 +31,7 @@ public class ProviderController {
         this.providerService = providerService;
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROVIDER')")
     @PostMapping
     @Operation(
             summary = "Criar prestador",
@@ -48,12 +51,13 @@ public class ProviderController {
             )
     })
     public ResponseEntity<Provider> criar(
-            @RequestBody Provider provider) {
+            @Valid @RequestBody Provider provider) {
 
         return ResponseEntity.status(201)
                 .body(providerService.criar(provider));
     }
 
+    @PreAuthorize("isAuthenticated")
     @GetMapping
     @Operation(
             summary = "Listar prestadores",
@@ -73,6 +77,7 @@ public class ProviderController {
         return ResponseEntity.ok(providerService.listar());
     }
 
+    @PreAuthorize("isAuthenticated")
     @GetMapping("/{id}")
     @Operation(
             summary = "Buscar prestador por ID",
@@ -105,6 +110,7 @@ public class ProviderController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROVIDER')")
     @PutMapping("/{id}")
     @Operation(
             summary = "Atualizar prestador",
@@ -128,13 +134,14 @@ public class ProviderController {
             )
             @PathVariable Long id,
 
-            @RequestBody Provider provider) {
+            @Valid @RequestBody Provider provider) {
 
         return ResponseEntity.ok(
                 providerService.atualizar(id, provider)
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'PROVIDER')")
     @PatchMapping("/{id}")
     @Operation(
             summary = "Atualizar parcialmente um prestador",
@@ -169,6 +176,8 @@ public class ProviderController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Excluir prestador",

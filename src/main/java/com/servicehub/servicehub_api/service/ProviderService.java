@@ -3,6 +3,8 @@ package com.servicehub.servicehub_api.service;
 import com.servicehub.servicehub_api.model.Provider;
 import com.servicehub.servicehub_api.repository.ProviderRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -19,6 +21,8 @@ public class ProviderService {
 
 
     public Provider criar(Provider provider) {
+
+        sanitizar(provider);
         return providerRepository.save(provider);
     }
 
@@ -31,6 +35,7 @@ public class ProviderService {
     }
 
     public Provider atualizar(Long id, Provider provider) {
+        sanitizar(provider);
         provider.setId(id);
         return providerRepository.save(provider);
     }
@@ -61,7 +66,22 @@ public class ProviderService {
             provider.setPhone((String) campos.get("phone"));
         }
 
+        sanitizar(provider);
         return Optional.of(providerRepository.save(provider));
+    }
+
+    //  metodo de sanitizar
+    private void sanitizar(Provider provider) {
+        if (provider.getName() != null) {
+            // Remove espaços nas pontas e converte <, >, " em entidades seguras (evita XSS)
+            provider.setName(HtmlUtils.htmlEscape(provider.getName().trim()));
+        }
+        if (provider.getEmail() != null) {
+            provider.setEmail(provider.getEmail().trim().toLowerCase());
+        }
+        if (provider.getPhone() != null) {
+            provider.setPhone(provider.getPhone().trim());
+        }
     }
 
 }

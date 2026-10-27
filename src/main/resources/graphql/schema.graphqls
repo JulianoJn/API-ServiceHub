@@ -1,0 +1,39 @@
+# --- QUERIES (Leitura) ---
+type Query {
+    providers: [Provider!]!
+    provider(id: ID!): Provider
+
+    clients: [Client!]!
+    client(id: ID!): Client
+
+    contracts: [Contract!]!
+    contract(id: ID!): Contract
+}
+
+# --- MUTATIONS (Escrita) ---
+type Mutation {
+    createProvider(name: String!, email: String!, phone: String!): Provider!
+    createClient(name: String!, email: String!, phone: String!): Client!
+    createContract(providerId: ID!, clientId: ID!): Contract!
+}
+
+# --- TIPOS DE DADOS ---
+type Provider {
+    id: ID!
+    name: String!
+    email: String!
+    phone: String!
+}
+
+type Client {
+    id: ID!
+    name: String!
+    email: String!
+    phone: String!
+}
+
+type Contract {
+    id: ID!
+    provider: Provider!
+    client: Client!
+}

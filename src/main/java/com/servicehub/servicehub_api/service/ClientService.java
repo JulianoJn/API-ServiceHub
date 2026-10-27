@@ -1,8 +1,10 @@
 package com.servicehub.servicehub_api.service;
 
 import com.servicehub.servicehub_api.model.Client;
+import com.servicehub.servicehub_api.model.Provider;
 import com.servicehub.servicehub_api.repository.ClientRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.web.util.HtmlUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -19,6 +21,7 @@ public class ClientService {
     }
 
     public Client criar(Client client) {
+        sanitizar(client);
         return clientRepository.save(client);
     }
 
@@ -31,6 +34,7 @@ public class ClientService {
     }
 
     public Client atualizar(Long id, Client client) {
+        sanitizar(client);
         client.setId(id);
         return clientRepository.save(client);
     }
@@ -41,7 +45,10 @@ public class ClientService {
 
     public Optional<Client> atualizarParcial(Long id, Map<String, Object> campos) {
 
+
+
         Optional<Client> resultado = clientRepository.findById(id);
+
 
         if (resultado.isEmpty()) {
             return Optional.empty();
@@ -61,7 +68,23 @@ public class ClientService {
             client.setPhone((String) campos.get("phone"));
         }
 
+        sanitizar(client);
+
         return Optional.of(clientRepository.save(client));
+    }
+
+    //  metodo de sanitizar
+    private void sanitizar(Client client) {
+        if (client.getName() != null) {
+            // Remove espaços nas pontas e converte <, >, " em entidades seguras (evita XSS)
+            client.setName(HtmlUtils.htmlEscape(client.getName().trim()));
+        }
+        if (client.getEmail() != null) {
+            client.setEmail(client.getEmail().trim().toLowerCase());
+        }
+        if (client.getPhone() != null) {
+            client.setPhone(client.getPhone().trim());
+        }
     }
 
 }
